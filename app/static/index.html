@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trash Detection & Classification - YOLOv8s</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="glow-orb" id="orb-1"></div>
+    <div class="glow-orb" id="orb-2"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-trash-arrow-up green-glow"></i>
+                <h1>Recycle<span>AI</span></h1>
+            </div>
+            <p class="subtitle">Deteksi dan Klasifikasi Sampah Otomatis Menggunakan Model YOLOv8s</p>
+        </header>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard">
+            <!-- Left Panel: Uploader & Control -->
+            <section class="panel control-panel">
+                <div class="card uploader-card">
+                    <h2><i class="fa-solid fa-cloud-arrow-up"></i> Unggah Gambar</h2>
+                    <p class="card-desc">Tarik dan letakkan gambar di sini atau klik untuk memilih file.</p>
+                    
+                    <div class="drop-zone" id="drop-zone">
+                        <div class="drop-zone-content">
+                            <i class="fa-solid fa-images drop-icon"></i>
+                            <span class="drop-text">Letakkan gambar Anda di sini</span>
+                            <span class="drop-subtext">Mendukung file JPG, JPEG, PNG</span>
+                            <button class="btn btn-primary" id="btn-browse">Pilih Gambar</button>
+                        </div>
+                        <input type="file" id="file-input" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="card info-card">
+                    <h2><i class="fa-solid fa-circle-info"></i> Panduan Dataset</h2>
+                    <p class="card-desc">Model YOLOv8s ini dilatih menggunakan dataset TrashNet (3) untuk mengklasifikasikan sampah menjadi kategori berikut:</p>
+                    <div class="class-grid">
+                        <span class="class-badge badge-glass"><i class="fa-solid fa-box"></i> Cardboard</span>
+                        <span class="class-badge badge-glass"><i class="fa-solid fa-wine-bottle"></i> Glass</span>
+                        <span class="class-badge badge-glass"><i class="fa-solid fa-prescription-bottle"></i> Plastic</span>
+                        <span class="class-badge badge-glass"><i class="fa-solid fa-newspaper"></i> Paper</span>
+                        <span class="class-badge badge-glass"><i class="fa-solid fa-sheet-metal"></i> Metal</span>
+                        <span class="class-badge badge-glass"><i class="fa-solid fa-dumpster"></i> Trash (Residu)</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Results -->
+            <section class="panel result-panel">
+                <!-- Result Image Card -->
+                <div class="card result-card">
+                    <h2><i class="fa-solid fa-magnifying-glass-chart"></i> Hasil Deteksi</h2>
+                    
+                    <div class="viewer-container">
+                        <!-- Before upload / Placeholder -->
+                        <div class="viewer-placeholder" id="viewer-placeholder">
+                            <i class="fa-solid fa-circle-question placeholder-icon"></i>
+                            <p>Unggah gambar terlebih dahulu untuk melihat hasil analisis model.</p>
+                        </div>
+
+                        <!-- Analysis View (hidden initially) -->
+                        <div class="viewer-active" id="viewer-active" style="display: none;">
+                            <div class="image-box">
+                                <img id="result-img" src="" alt="Hasil Deteksi YOLO">
+                                <div class="image-overlay-text"><i class="fa-solid fa-microchip"></i> YOLOv8s Annotated</div>
+                            </div>
+                        </div>
+
+                        <!-- Loading spinner (hidden initially) -->
+                        <div class="loading-container" id="loading-container" style="display: none;">
+                            <div class="spinner"></div>
+                            <p>Sedang menganalisis gambar...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Summary Cards (hidden initially) -->
+                <div class="card summary-card" id="summary-card" style="display: none;">
+                    <h2><i class="fa-solid fa-list-check"></i> Objek Terdeteksi</h2>
+                    
+                    <div class="table-container">
+                        <table class="result-table">
+                            <thead>
+                                <tr>
+                                    <th>Kategori</th>
+                                    <th>Confidence</th>
+                                    <th>Status Akurasi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="result-table-body">
+                                <!-- Data dimasukkan dinamis dari JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 RecycleAI - Trash Detection System. Powered by YOLOv8s.</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

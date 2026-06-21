@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+env/
+.env
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE configurations
+.vscode/
+.idea/
+
+# Large model files (optional: keep commented out if you want to push small weights to GitHub, 
+# but recommended to ignore if they get larger than 100MB)
+# best.pt
+# yolov8s.pt
+
+# Temporary/crash files
+*.stackdump
+*.log
