@@ -108,16 +108,8 @@ async def predict(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gagal melakukan deteksi: {str(e)}")
 
-# Route untuk menyajikan halaman utama
-@app.get("/")
-async def get_index():
-    index_path = os.path.join(static_dir, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return JSONResponse(content={"message": "Frontend static/index.html belum dibuat."})
-
-# Daftarkan folder static agar file css/js bisa diakses
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+# Daftarkan folder static di root "/" agar index.html dan asset lainnya bisa diakses secara relatif
+app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
