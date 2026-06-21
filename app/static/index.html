@@ -3,119 +3,694 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trash Detection & Classification - YOLOv8s</title>
+    <title>RecycleAI — Smart Recycling Assistant Powered by Computer Vision</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <!-- FontAwesome for icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=1.2.0">
+    <!-- FontAwesome 6.4.0 untuk ikon modern -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="dark-theme"> <!-- Default dark theme -->
+    <!-- Background Effects -->
     <div class="glass-bg"></div>
     <div class="glow-orb" id="orb-1"></div>
     <div class="glow-orb" id="orb-2"></div>
+    <div class="glow-orb" id="orb-3"></div>
 
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <div class="logo">
-                <i class="fa-solid fa-trash-arrow-up green-glow"></i>
-                <h1>Recycle<span>AI</span></h1>
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Achievement Celebration Modal Overlay -->
+    <div class="modal-overlay" id="achievement-modal" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-glow-bg"></div>
+            <div class="modal-badge-icon" id="modal-badge-icon">
+                <i class="fa-solid fa-award"></i>
             </div>
-            <p class="subtitle">Deteksi dan Klasifikasi Sampah Otomatis Menggunakan Model YOLOv8s</p>
-        </header>
+            <span class="modal-subtitle">Pencapaian Baru Terbuka!</span>
+            <h2 id="modal-badge-title">Duta Plastik</h2>
+            <p id="modal-badge-desc">Hebat! Anda telah memilah 5 sampah plastik.</p>
+            <button class="btn btn-success" id="btn-close-modal">
+                <i class="fa-solid fa-earth-asia"></i> Lanjutkan Kontribusi
+            </button>
+        </div>
+    </div>
 
-        <!-- Main Dashboard -->
-        <main class="dashboard">
-            <!-- Left Panel: Uploader & Control -->
-            <section class="panel control-panel">
-                <div class="card uploader-card">
-                    <h2><i class="fa-solid fa-cloud-arrow-up"></i> Unggah Gambar</h2>
-                    <p class="card-desc">Tarik dan letakkan gambar di sini atau klik untuk memilih file.</p>
-                    
-                    <div class="drop-zone" id="drop-zone">
-                        <div class="drop-zone-content">
-                            <i class="fa-solid fa-images drop-icon"></i>
-                            <span class="drop-text">Letakkan gambar Anda di sini</span>
-                            <span class="drop-subtext">Mendukung file JPG, JPEG, PNG</span>
-                            <button class="btn btn-primary" id="btn-browse">Pilih Gambar</button>
-                        </div>
-                        <input type="file" id="file-input" accept="image/*" style="display: none;">
+    <div class="app-layout">
+        <!-- Sidebar Navigation (Desktop) -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-trash-arrow-up green-glow"></i>
+                <h2>Recycle<span>AI</span></h2>
+            </div>
+
+            <!-- User Profile Summary (Sidebar) -->
+            <div class="user-summary-card">
+                <div class="user-avatar">
+                    <i class="fa-solid fa-seedling" id="sidebar-avatar-icon"></i>
+                </div>
+                <div class="user-info">
+                    <span class="user-title">Eco Level</span>
+                    <span class="user-badge" id="sidebar-level-badge">Eco Novice</span>
+                </div>
+                <div class="points-badge">
+                    <span id="sidebar-points-val">0</span> <small>pts</small>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link" data-tab="scanner">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Scanner RVM</span>
+                </a>
+                <a href="#" class="nav-link" data-tab="history">
+                    <i class="fa-solid fa-history"></i>
+                    <span>Riwayat Deteksi</span>
+                </a>
+                <a href="#" class="nav-link" data-tab="education">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>EduRecycle</span>
+                </a>
+            </nav>
+
+            <!-- Theme Toggle & Stats inside Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-controls">
+                    <button class="btn-theme-toggle" id="btn-theme-toggle-sidebar" title="Ganti Tema">
+                        <i class="fa-solid fa-sun icon-sun"></i>
+                        <i class="fa-solid fa-moon icon-moon"></i>
+                        <span>Mode Terang</span>
+                    </button>
+                </div>
+                <p>RecycleAI v1.2.0</p>
+                <span>Powered by YOLOv8s</span>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <!-- Header Mobile / Top bar -->
+            <header class="top-bar">
+                <div class="mobile-brand">
+                    <i class="fa-solid fa-trash-arrow-up green-glow"></i>
+                    <h1>Recycle<span>AI</span></h1>
+                </div>
+                <div class="mobile-controls-wrapper">
+                    <!-- Mobile theme toggle -->
+                    <button class="btn-theme-toggle-mobile" id="btn-theme-toggle-mobile" title="Ganti Tema">
+                        <i class="fa-solid fa-sun icon-sun"></i>
+                        <i class="fa-solid fa-moon icon-moon"></i>
+                    </button>
+                    <div class="points-badge-mobile">
+                        <i class="fa-solid fa-coins"></i>
+                        <span id="mobile-points-val">0</span>
                     </div>
                 </div>
+            </header>
 
-                <div class="card info-card">
-                    <h2><i class="fa-solid fa-circle-info"></i> Panduan Dataset</h2>
-                    <p class="card-desc">Model YOLOv8s ini dilatih menggunakan dataset TrashNet (3) untuk mengklasifikasikan sampah menjadi kategori berikut:</p>
-                    <div class="class-grid">
-                        <span class="class-badge badge-glass"><i class="fa-solid fa-box"></i> Cardboard</span>
-                        <span class="class-badge badge-glass"><i class="fa-solid fa-wine-bottle"></i> Glass</span>
-                        <span class="class-badge badge-glass"><i class="fa-solid fa-prescription-bottle"></i> Plastic</span>
-                        <span class="class-badge badge-glass"><i class="fa-solid fa-newspaper"></i> Paper</span>
-                        <span class="class-badge badge-glass"><i class="fa-solid fa-sheet-metal"></i> Metal</span>
-                        <span class="class-badge badge-glass"><i class="fa-solid fa-dumpster"></i> Trash (Residu)</span>
+            <!-- Active Tab Content -->
+            <main class="content-area">
+                
+                <!-- TAB 1: DASHBOARD -->
+                <section id="tab-dashboard" class="tab-section active">
+                    <div class="section-header-branded">
+                        <span class="brand-tagline">RecycleAI — Smart Recycling Assistant Powered by Computer Vision</span>
+                        <h2>Statistik & Dampak Lingkungan</h2>
+                        <p>Pantau kontribusi daur ulang Anda dan dampaknya secara nyata bagi bumi.</p>
                     </div>
-                </div>
-            </section>
 
-            <!-- Right Panel: Results -->
-            <section class="panel result-panel">
-                <!-- Result Image Card -->
-                <div class="card result-card">
-                    <h2><i class="fa-solid fa-magnifying-glass-chart"></i> Hasil Deteksi</h2>
-                    
-                    <div class="viewer-container">
-                        <!-- Before upload / Placeholder -->
-                        <div class="viewer-placeholder" id="viewer-placeholder">
-                            <i class="fa-solid fa-circle-question placeholder-icon"></i>
-                            <p>Unggah gambar terlebih dahulu untuk melihat hasil analisis model.</p>
+                    <!-- Top Metrics Grid -->
+                    <div class="metrics-grid">
+                        <!-- Level Progress Card -->
+                        <div class="metric-card glass-card level-card">
+                            <div class="card-title-icon">
+                                <h3>Eco Level & Lencana</h3>
+                                <i class="fa-solid fa-medal icon-badge-green" id="dashboard-level-icon"></i>
+                            </div>
+                            <div class="level-display">
+                                <span class="level-name" id="dashboard-level-name">Eco Novice</span>
+                                <span class="points-detail"><strong id="dashboard-points-current">0</strong> / <span id="dashboard-points-next">100</span> pts</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="dashboard-level-progress" style="width: 0%"></div>
+                            </div>
+                            <p class="progress-subtext" id="level-hint">Kumpulkan 100 poin lagi untuk naik level!</p>
                         </div>
 
-                        <!-- Analysis View (hidden initially) -->
-                        <div class="viewer-active" id="viewer-active" style="display: none;">
-                            <div class="image-box">
-                                <img id="result-img" src="" alt="Hasil Deteksi YOLO">
-                                <div class="image-overlay-text"><i class="fa-solid fa-microchip"></i> YOLOv8s Annotated</div>
+                        <!-- Scan Counter Card -->
+                        <div class="metric-card glass-card counter-card">
+                            <div class="card-title-icon">
+                                <h3>Daur Ulang Anda</h3>
+                                <i class="fa-solid fa-leaf icon-leaf-cyan"></i>
+                            </div>
+                            <div class="counter-display">
+                                <span class="counter-number" id="dashboard-total-items">0</span>
+                                <span class="counter-unit">item sampah dipilah</span>
+                            </div>
+                            <p class="progress-subtext">Dari 6 kategori yang dideteksi oleh AI.</p>
+                        </div>
+                    </div>
+
+                    <!-- Environmental Impact Grid (Environmental Storytelling) -->
+                    <div class="section-subheader">
+                        <h3><i class="fa-solid fa-earth-americas text-green-accent"></i> Dampak Ekologis Positif</h3>
+                        <p>Mengonversi sampah daur ulang Anda menjadi analogi dampak lingkungan nyata.</p>
+                    </div>
+                    <div class="impact-grid">
+                        <!-- CO2 Card -->
+                        <div class="impact-card glass-card" id="impact-co2">
+                            <div class="impact-icon-wrapper">
+                                <i class="fa-solid fa-cloud-arrow-down"></i>
+                            </div>
+                            <div class="impact-info">
+                                <span class="impact-value" id="impact-co2-val">0.00</span>
+                                <span class="impact-unit">kg CO₂ berkurang</span>
+                                <p class="impact-analogy" id="analogy-co2">Setara mengisi daya HP 0 kali</p>
                             </div>
                         </div>
 
-                        <!-- Loading spinner (hidden initially) -->
-                        <div class="loading-container" id="loading-container" style="display: none;">
-                            <div class="spinner"></div>
-                            <p>Sedang menganalisis gambar...</p>
+                        <!-- Energy Card -->
+                        <div class="impact-card glass-card" id="impact-energy">
+                            <div class="impact-icon-wrapper">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <div class="impact-info">
+                                <span class="impact-value" id="impact-energy-val">0.00</span>
+                                <span class="impact-unit">kWh energi dihemat</span>
+                                <p class="impact-analogy" id="analogy-energy">Setara menyalakan LED 0 jam</p>
+                            </div>
+                        </div>
+
+                        <!-- Water Card -->
+                        <div class="impact-card glass-card" id="impact-water">
+                            <div class="impact-icon-wrapper">
+                                <i class="fa-solid fa-droplet"></i>
+                            </div>
+                            <div class="impact-info">
+                                <span class="impact-value" id="impact-water-val">0.00</span>
+                                <span class="impact-unit">Liter air bersih hemat</span>
+                                <p class="impact-analogy" id="analogy-water">Setara 0 botol air 1.5L</p>
+                            </div>
+                        </div>
+
+                        <!-- Landfill Space Card -->
+                        <div class="impact-card glass-card" id="impact-landfill">
+                            <div class="impact-icon-wrapper">
+                                <i class="fa-solid fa-mountain"></i>
+                            </div>
+                            <div class="impact-info">
+                                <span class="impact-value" id="impact-landfill-val">0.00</span>
+                                <span class="impact-unit">Liter ruang TPA diselamatkan</span>
+                                <p class="impact-analogy" id="analogy-landfill">Setara volume 0 kotak tisu</p>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Analysis Summary Cards (hidden initially) -->
-                <div class="card summary-card" id="summary-card" style="display: none;">
-                    <h2><i class="fa-solid fa-list-check"></i> Objek Terdeteksi</h2>
-                    
-                    <div class="table-container">
-                        <table class="result-table">
-                            <thead>
-                                <tr>
-                                    <th>Kategori</th>
-                                    <th>Confidence</th>
-                                    <th>Status Akurasi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="result-table-body">
-                                <!-- Data dimasukkan dinamis dari JavaScript -->
-                            </tbody>
-                        </table>
+                    <!-- Achievement Badges Grid -->
+                    <div class="section-subheader">
+                        <h3><i class="fa-solid fa-award text-cyan-accent"></i> Lencana Pencapaian Ekologi</h3>
+                        <p>Lencana yang terbuka dinamis sesuai kontribusi dan kesadaran lingkungan Anda.</p>
                     </div>
-                </div>
-            </section>
-        </main>
+                    <div class="badges-grid" id="badges-grid">
+                        <!-- Badge 1: First Save -->
+                        <div class="badge-card glass-card locked" id="badge-first-save">
+                            <div class="badge-card-icon"><i class="fa-solid fa-seedling"></i></div>
+                            <div class="badge-card-info">
+                                <h4>Penyelamat Pertama</h4>
+                                <p>Deteksi sampah pertama Anda</p>
+                                <span class="badge-card-progress" id="progress-first-save">0 / 1</span>
+                            </div>
+                        </div>
 
-        <!-- Footer -->
-        <footer>
-            <p>&copy; 2026 RecycleAI - Trash Detection System. Powered by YOLOv8s.</p>
-        </footer>
+                        <!-- Badge 2: Plastic Ambassador -->
+                        <div class="badge-card glass-card locked" id="badge-plastic-ambassador">
+                            <div class="badge-card-icon"><i class="fa-solid fa-prescription-bottle"></i></div>
+                            <div class="badge-card-info">
+                                <h4>Duta Plastik</h4>
+                                <p>Pilah 5 sampah plastik</p>
+                                <span class="badge-card-progress" id="progress-plastic-ambassador">0 / 5</span>
+                            </div>
+                        </div>
+
+                        <!-- Badge 3: Glass Saver -->
+                        <div class="badge-card glass-card locked" id="badge-glass-saver">
+                            <div class="badge-card-icon"><i class="fa-solid fa-wine-bottle"></i></div>
+                            <div class="badge-card-info">
+                                <h4>Penyelamat Kaca</h4>
+                                <p>Pilah 5 sampah kaca</p>
+                                <span class="badge-card-progress" id="progress-glass-saver">0 / 5</span>
+                            </div>
+                        </div>
+
+                        <!-- Badge 4: Metal Hero -->
+                        <div class="badge-card glass-card locked" id="badge-metal-hero">
+                            <div class="badge-card-icon"><i class="fa-solid fa-sheet-metal"></i></div>
+                            <div class="badge-card-info">
+                                <h4>Pahlawan Logam</h4>
+                                <p>Pilah 5 sampah logam</p>
+                                <span class="badge-card-progress" id="progress-metal-hero">0 / 5</span>
+                            </div>
+                        </div>
+
+                        <!-- Badge 5: Forest Guardian -->
+                        <div class="badge-card glass-card locked" id="badge-forest-guardian">
+                            <div class="badge-card-icon"><i class="fa-solid fa-tree"></i></div>
+                            <div class="badge-card-info">
+                                <h4>Penjaga Hutan</h4>
+                                <p>Pilah 10 sampah kertas/karton</p>
+                                <span class="badge-card-progress" id="progress-forest-guardian">0 / 10</span>
+                            </div>
+                        </div>
+
+                        <!-- Badge 6: Earth Protector -->
+                        <div class="badge-card glass-card locked" id="badge-earth-protector">
+                            <div class="badge-card-icon"><i class="fa-solid fa-globe"></i></div>
+                            <div class="badge-card-info">
+                                <h4>Penjaga Bumi</h4>
+                                <p>Kumpulkan 500 poin daur ulang</p>
+                                <span class="badge-card-progress" id="progress-earth-protector">0 / 500</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trash Breakdown Category Charts -->
+                    <div class="section-subheader">
+                        <h3><i class="fa-solid fa-chart-simple text-green-accent"></i> Statistik per Kategori Sampah</h3>
+                        <p>Jumlah unit sampah yang berhasil disortir berdasarkan deteksi AI.</p>
+                    </div>
+                    <div class="category-breakdown-grid">
+                        <!-- Plastic -->
+                        <div class="category-stat-card glass-card semantic-plastic">
+                            <div class="cat-header">
+                                <span class="cat-name"><i class="fa-solid fa-prescription-bottle"></i> Plastik</span>
+                                <span class="cat-count" id="count-plastic">0</span>
+                            </div>
+                            <div class="cat-bar-bg"><div class="cat-bar-fill" id="bar-plastic" style="width: 0%"></div></div>
+                            <span class="cat-points-desc">15 pts / item • Yellow Bin</span>
+                        </div>
+                        <!-- Glass -->
+                        <div class="category-stat-card glass-card semantic-glass">
+                            <div class="cat-header">
+                                <span class="cat-name"><i class="fa-solid fa-wine-bottle"></i> Kaca</span>
+                                <span class="cat-count" id="count-glass">0</span>
+                            </div>
+                            <div class="cat-bar-bg"><div class="cat-bar-fill" id="bar-glass" style="width: 0%"></div></div>
+                            <span class="cat-points-desc">20 pts / item • Green Bin</span>
+                        </div>
+                        <!-- Metal -->
+                        <div class="category-stat-card glass-card semantic-metal">
+                            <div class="cat-header">
+                                <span class="cat-name"><i class="fa-solid fa-sheet-metal"></i> Logam</span>
+                                <span class="cat-count" id="count-metal">0</span>
+                            </div>
+                            <div class="cat-bar-bg"><div class="cat-bar-fill" id="bar-metal" style="width: 0%"></div></div>
+                            <span class="cat-points-desc">25 pts / item • Red/Gray Bin</span>
+                        </div>
+                        <!-- Cardboard -->
+                        <div class="category-stat-card glass-card semantic-cardboard">
+                            <div class="cat-header">
+                                <span class="cat-name"><i class="fa-solid fa-box"></i> Karton</span>
+                                <span class="cat-count" id="count-cardboard">0</span>
+                            </div>
+                            <div class="cat-bar-bg"><div class="cat-bar-fill" id="bar-cardboard" style="width: 0%"></div></div>
+                            <span class="cat-points-desc">10 pts / item • Blue Bin</span>
+                        </div>
+                        <!-- Paper -->
+                        <div class="category-stat-card glass-card semantic-paper">
+                            <div class="cat-header">
+                                <span class="cat-name"><i class="fa-solid fa-newspaper"></i> Kertas</span>
+                                <span class="cat-count" id="count-paper">0</span>
+                            </div>
+                            <div class="cat-bar-bg"><div class="cat-bar-fill" id="bar-paper" style="width: 0%"></div></div>
+                            <span class="cat-points-desc">10 pts / item • Blue Bin</span>
+                        </div>
+                        <!-- Trash (Residu) -->
+                        <div class="category-stat-card glass-card semantic-trash">
+                            <div class="cat-header">
+                                <span class="cat-name"><i class="fa-solid fa-dumpster"></i> Residu (Trash)</span>
+                                <span class="cat-count" id="count-trash">0</span>
+                            </div>
+                            <div class="cat-bar-bg"><div class="cat-bar-fill" id="bar-trash" style="width: 0%"></div></div>
+                            <span class="cat-points-desc">5 pts / item • Black Bin</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: SCANNER (THE CORE WEB RVM FEATURE) -->
+                <section id="tab-scanner" class="tab-section">
+                    <div class="section-header-branded">
+                        <span class="brand-tagline">RecycleAI — Smart Recycling Assistant Powered by Computer Vision</span>
+                        <h2>Smart Reverse Vending Machine</h2>
+                        <p>Nyalakan kamera real-time Anda atau unggah gambar untuk memindai sampah dengan kecerdasan YOLOv8s.</p>
+                    </div>
+
+                    <div class="scanner-layout">
+                        <!-- Left Panel: Viewport -->
+                        <div class="scanner-viewport-panel">
+                            <div class="viewport-modes-header">
+                                <button class="mode-toggle-btn active" id="btn-mode-camera">
+                                    <i class="fa-solid fa-video"></i> Kamera Real-Time
+                                </button>
+                                <button class="mode-toggle-btn" id="btn-mode-upload">
+                                    <i class="fa-solid fa-image"></i> Unggah Gambar
+                                </button>
+                            </div>
+
+                            <!-- Interactive Viewer Frame -->
+                            <div class="viewer-frame">
+                                <!-- Mode 1: Camera Feed (Active by Default) -->
+                                <div class="viewport-element active" id="camera-viewport">
+                                    <!-- Scanning animation overlay -->
+                                    <div class="scan-laser-line" id="scan-line"></div>
+                                    <div class="camera-target-corners">
+                                        <div class="corner top-left"></div>
+                                        <div class="corner top-right"></div>
+                                        <div class="corner bottom-left"></div>
+                                        <div class="corner bottom-right"></div>
+                                    </div>
+                                    
+                                    <video id="webcam-feed" autoplay playsinline muted></video>
+                                    
+                                    <!-- Camera Unavailable Placeholder -->
+                                    <div class="viewport-error-overlay" id="camera-error-overlay">
+                                        <i class="fa-solid fa-camera-slash"></i>
+                                        <p>Akses kamera belum aktif. Berikan izin browser dan aktifkan tombol di bawah.</p>
+                                        <button class="btn btn-primary" id="btn-start-camera-fallback">
+                                            <i class="fa-solid fa-play"></i> Aktifkan Kamera
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Mode 2: Upload Area -->
+                                <div class="viewport-element" id="upload-viewport">
+                                    <div class="drop-zone" id="drop-zone">
+                                        <div class="drop-zone-content">
+                                            <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                                            <span class="drop-text">Tarik & Letakkan berkas gambar Anda di sini</span>
+                                            <span class="drop-subtext">Mendukung format JPG, JPEG, PNG</span>
+                                            <button class="btn btn-primary" id="btn-browse-file">Pilih Gambar</button>
+                                        </div>
+                                        <input type="file" id="file-input-scanner" accept="image/*" style="display: none;">
+                                    </div>
+                                </div>
+
+                                <!-- Mode 3: Analysis Result Display (Image overlay with bounding boxes from backend) -->
+                                <div class="viewport-element" id="result-viewport">
+                                    <div class="result-image-wrapper">
+                                        <img id="result-annotated-img" src="" alt="Hasil Analisis YOLO">
+                                        <div class="image-overlay-badge">
+                                            <i class="fa-solid fa-microchip"></i> YOLOv8s Terdeteksi
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Loading overlay -->
+                                <div class="loading-overlay" id="scanner-loading" style="display: none;">
+                                    <div class="scanner-spinner"></div>
+                                    <p id="loading-text">Sedang Menganalisis...</p>
+                                </div>
+                            </div>
+
+                            <!-- Camera Controls bar -->
+                            <div class="viewport-controls" id="camera-controls-panel">
+                                <button class="btn btn-danger" id="btn-stop-camera" style="display: none;">
+                                    <i class="fa-solid fa-stop"></i> Matikan Kamera
+                                </button>
+                                <button class="btn btn-success" id="btn-start-camera">
+                                    <i class="fa-solid fa-play"></i> Nyalakan Kamera
+                                </button>
+                                <button class="btn btn-primary" id="btn-capture" disabled>
+                                    <i class="fa-solid fa-camera"></i> Ambil Foto & Deteksi
+                                </button>
+                                <button class="btn btn-secondary btn-icon-only" id="btn-switch-camera" title="Ganti Kamera">
+                                    <i class="fa-solid fa-camera-rotate"></i>
+                                </button>
+                                
+                                <div class="toggle-control-wrapper">
+                                    <label class="switch">
+                                        <input type="checkbox" id="toggle-auto-detect">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <span class="toggle-label">Auto-Detect (~1.5s)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Results & Recommendations -->
+                        <div class="scanner-results-panel">
+                            <!-- Placeholder (Before detection) -->
+                            <div class="results-placeholder glass-card" id="results-placeholder">
+                                <i class="fa-solid fa-circle-question"></i>
+                                <h4>Menunggu Pemindaian</h4>
+                                <p>Aktifkan kamera untuk memindai sampah Anda, atau unggah gambar untuk memulai identifikasi AI.</p>
+                            </div>
+
+                            <!-- Active results container (hidden initially) -->
+                            <div class="results-active-container" id="results-active" style="display: none;">
+                                <!-- Points reward card -->
+                                <div class="points-reward-card" id="points-reward-card">
+                                    <div class="reward-icon"><i class="fa-solid fa-circle-check"></i></div>
+                                    <div class="reward-text">
+                                        <h4 id="points-reward-title">Sampah Teridentifikasi!</h4>
+                                        <p id="points-reward-desc">Anda mendapatkan +0 poin daur ulang.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Disposal Recommendation Card -->
+                                <div class="card glass-card recommendation-card">
+                                    <h2><i class="fa-solid fa-trash-can"></i> Rekomendasi Tempat Pembuangan</h2>
+                                    
+                                    <div class="bin-visualization" id="bin-visualizer">
+                                        <div class="bin-icon-container" id="bin-color-class">
+                                            <i class="fa-solid fa-dumpster"></i>
+                                            <span class="bin-label" id="bin-label-text">KUNING</span>
+                                        </div>
+                                        <div class="bin-info-text">
+                                            <h4 id="bin-name-title">Tempat Sampah Daur Ulang Plastik</h4>
+                                            <p id="bin-desc-text">Masukkan ke tempat sampah kuning untuk didaur ulang.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="recommendation-guidelines">
+                                        <h4>Panduan Pembuangan yang Tepat:</h4>
+                                        <ul id="recommendation-steps">
+                                            <li>Bilas wadah dari sisa makanan/cairan.</li>
+                                            <li>Pipihkan botol/wadah jika memungkinkan.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Bounding Box Class List Table -->
+                                <div class="card glass-card details-card">
+                                    <h2><i class="fa-solid fa-clipboard-list"></i> Hasil Pemindaian AI</h2>
+                                    <div class="table-wrapper">
+                                        <table class="detection-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Kategori</th>
+                                                    <th>Confidence</th>
+                                                    <th>Poin</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="detection-table-body">
+                                                <!-- Dynamic Rows -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="results-actions">
+                                        <button class="btn btn-secondary" id="btn-scan-again">
+                                            <i class="fa-solid fa-rotate-left"></i> Pindai Objek Lain
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 3: HISTORY -->
+                <section id="tab-history" class="tab-section">
+                    <div class="section-header-branded">
+                        <span class="brand-tagline">RecycleAI — Smart Recycling Assistant Powered by Computer Vision</span>
+                        <h2>Riwayat Pemindaian Anda</h2>
+                        <p>Daftar aktivitas daur ulang yang berhasil Anda selesaikan di mesin RVM ini.</p>
+                    </div>
+
+                    <div class="card glass-card history-card">
+                        <div class="history-actions-header">
+                            <h3>Aktivitas Terbaru</h3>
+                            <button class="btn btn-danger" id="btn-clear-history">
+                                <i class="fa-solid fa-trash-can"></i> Hapus Seluruh Riwayat
+                            </button>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>Kategori Sampah</th>
+                                        <th>Jumlah Item</th>
+                                        <th>Poin Diperoleh</th>
+                                        <th>Tempat Pembuangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body">
+                                    <tr>
+                                        <td colspan="5" class="table-empty">
+                                            <i class="fa-solid fa-folder-open"></i>
+                                            <p>Belum ada riwayat aktivitas. Mulai memindai di tab Scanner!</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 4: EDUCATION -->
+                <section id="tab-education" class="tab-section">
+                    <div class="section-header-branded">
+                        <span class="brand-tagline">RecycleAI — Smart Recycling Assistant Powered by Computer Vision</span>
+                        <h2>Panduan Pemilahan Sampah</h2>
+                        <p>Ketahui arti kode warna tempat pembuangan sampah standar untuk memaksimalkan efisiensi daur ulang.</p>
+                    </div>
+
+                    <!-- Grid Penjelasan Tong Sampah -->
+                    <div class="edu-grid">
+                        <!-- Tong Biru -->
+                        <div class="edu-card glass-card border-blue">
+                            <div class="edu-header">
+                                <div class="edu-bin-color bg-blue">BIRU</div>
+                                <h3>Kertas & Karton (Paper/Cardboard)</h3>
+                            </div>
+                            <div class="edu-body">
+                                <p>Wadah pembuangan serat selulosa. Kertas kotor menghambat proses pembuatan bubur kertas baru.</p>
+                                <ul>
+                                    <li><strong>Contoh:</strong> Kardus paket, lembaran HVS, koran bekas, majalah, kertas amplop.</li>
+                                    <li><strong>Tips:</strong> Pastikan kertas bersih dan kering. Kardus tebal dilipat mendatar agar efisien tempat.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Tong Kuning -->
+                        <div class="edu-card glass-card border-yellow">
+                            <div class="edu-header">
+                                <div class="edu-bin-color bg-yellow">KUNING</div>
+                                <h3>Plastik (Plastic)</h3>
+                            </div>
+                            <div class="edu-body">
+                                <p>Tempat pembuangan plastik. Bahan plastik merupakan penyumbang timbunan sampah terlama di laut.</p>
+                                <ul>
+                                    <li><strong>Contoh:</strong> Botol air mineral PET, gelas plastik jus, botol sampo, wadah makanan.</li>
+                                    <li><strong>Tips:</strong> Selalu bilas sisa minuman manis. Pisahkan tutup botol jika bahannya berbeda.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Tong Hijau -->
+                        <div class="edu-card glass-card border-green">
+                            <div class="edu-header">
+                                <div class="edu-bin-color bg-green">HIJAU</div>
+                                <h3>Kaca (Glass)</h3>
+                            </div>
+                            <div class="edu-body">
+                                <p>Wadah kaca dapat dilebur kembali 100% tanpa batas tanpa mengurangi mutu kaca.</p>
+                                <ul>
+                                    <li><strong>Contoh:</strong> Botol kaca sirup, botol kaca kecap, toples kaca makanan, botol kaca obat.</li>
+                                    <li><strong>Tips:</strong> Jangan campur dengan cermin atau lampu bohlam karena merusak pemanasan tanur.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Tong Abu-Abu/Merah -->
+                        <div class="edu-card glass-card border-red">
+                            <div class="edu-header">
+                                <div class="edu-bin-color bg-red">ABU-ABU / MERAH</div>
+                                <h3>Logam & Kaleng (Metal)</h3>
+                            </div>
+                            <div class="edu-body">
+                                <p>Kaleng minuman ringan aluminium dan besi dapat diolah kembali menjadi produk logam secara efisien.</p>
+                                <ul>
+                                    <li><strong>Contoh:</strong> Kaleng soda, kaleng susu manis, tutup botol logam.</li>
+                                    <li><strong>Tips:</strong> Remas kaleng aluminium hingga tipis untuk mempermudah pengepresan.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Tong Hitam -->
+                        <div class="edu-card glass-card border-gray">
+                            <div class="edu-header">
+                                <div class="edu-bin-color bg-gray">HITAM</div>
+                                <h3>Residu / Sampah Umum (Trash)</h3>
+                            </div>
+                            <div class="edu-body">
+                                <p>Sampah akhir yang saat ini belum bisa didaur ulang secara efisien dan langsung ditujukan ke TPA.</p>
+                                <ul>
+                                    <li><strong>Contoh:</strong> Tisu basah, puntung rokok, popok bayi, bungkus makanan ringan laminasi foil.</li>
+                                    <li><strong>Tips:</strong> Jangan membuang sampah baterai atau kosmetik kimia di sini karena beracun (Limbah B3).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Eco Tips Card -->
+                    <div class="card glass-card edu-tips-card">
+                        <h3><i class="fa-solid fa-lightbulb text-yellow"></i> Tiga Prinsip Keberhasilan Daur Ulang</h3>
+                        <div class="steps-container">
+                            <div class="step-item">
+                                <div class="step-num">1</div>
+                                <h4>Bilas (Clean)</h4>
+                                <p>Bilas wadah dari sisa zat manis atau minyak. Kotoran mengotori sisa sampah lain yang bersih di dalam tong.</p>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-num">2</div>
+                                <h4>Keringkan (Dry)</h4>
+                                <p>Tiriskan dan keringkan kertas/karton. Kertas basah cepat membusuk dan merusak serat kayu daur ulang.</p>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-num">3</div>
+                                <h4>Pilahkan (Sort)</h4>
+                                <p>Pilah berdasarkan kategori menggunakan kamera RecycleAI agar disalurkan ke pabrik pengolahan yang tepat.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Bottom Navigation (Mobile) -->
+            <nav class="bottom-nav">
+                <a href="#" class="bottom-nav-link active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="bottom-nav-link" data-tab="scanner">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Scanner</span>
+                </a>
+                <a href="#" class="bottom-nav-link" data-tab="history">
+                    <i class="fa-solid fa-history"></i>
+                    <span>Riwayat</span>
+                </a>
+                <a href="#" class="bottom-nav-link" data-tab="education">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Edukasi</span>
+                </a>
+            </nav>
+
+            <!-- Footer -->
+            <footer class="main-footer">
+                <p>&copy; 2026 RecycleAI — Smart Recycling Assistant. Powered by YOLOv8s.</p>
+            </footer>
+        </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=1.2.0"></script>
 </body>
 </html>

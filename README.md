@@ -1,3 +1,13 @@
+---
+title: Trash Detection Backend
+emoji: 🗑️
+colorFrom: green
+colorTo: gray
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # RecycleAI - Trash Detection & Classification Web App
 
 Aplikasi Web berbasis AI untuk mendeteksi dan mengklasifikasikan sampah secara otomatis menggunakan model **YOLOv8s** yang dilatih dengan dataset **TrashNet**.
