@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Konfigurasi URL API: otomatis ke server lokal saat dev, atau gunakan URL backend produksi (misal Render/Railway) untuk Vercel.
-    const API_ENDPOINT = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    const API_ENDPOINT = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('hf.space')
         ? '/predict'
-        : 'https://trash-detection-backend.render.com/predict'; // <-- Ganti dengan URL backend produksi Anda setelah dideploy
+        : 'https://fauzulakbar-trash-detection-backend.hf.space/predict';
 
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
